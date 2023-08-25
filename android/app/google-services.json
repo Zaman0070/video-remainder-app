@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "62608555489",
+    "project_id": "remainder-app-2ec54",
+    "storage_bucket": "remainder-app-2ec54.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62608555489:android:572e151fdfff76e16726a0",
+        "android_client_info": {
+          "package_name": "com.theAppForce.reminder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "62608555489-4m9ngt9qrpk0q019r9v48mg5b3d48ddi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCAh_nSGCu0scd0Iba0bgua5avzNaJQEU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "62608555489-4m9ngt9qrpk0q019r9v48mg5b3d48ddi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
