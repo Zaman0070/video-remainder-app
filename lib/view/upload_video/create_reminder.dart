@@ -312,7 +312,6 @@ class _CreateRemainderState extends ConsumerState<CreateRemainder> {
                   onPressed: () async {
                     var uinqId = DateTime.now().second.toString();
                     NotificationService().scheduleNotification(
-                        onSelectNotification: sendMsg,
                         title: widget.title,
                         body: controller.text,
                         scheduledNotificationDateTime: scheduleTime);
