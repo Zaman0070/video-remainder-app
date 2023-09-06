@@ -1,19 +1,23 @@
 // ignore_for_file: library_private_types_in_public_api
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+// ignore: unused_import
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:reminder_app/constant/app_image.dart';
 import 'package:reminder_app/constant/widget/app_button.dart';
 import 'package:reminder_app/constant/widget/common_textfield.dart';
-import 'package:reminder_app/models/video.dart';
+import 'package:reminder_app/main.dart';
 import 'package:reminder_app/services/firebase_services/firebase_services.dart';
 import 'package:reminder_app/services/notifi_service/notifi_service.dart';
+import 'package:reminder_app/services/notifi_service/shedule_msg.dart';
 import 'package:reminder_app/view/upload_video/widgets/reminder_card.dart';
+import 'package:twilio_flutter/twilio_flutter.dart';
+import 'package:workmanager/workmanager.dart';
 
-class CreateRemainder extends StatefulWidget {
+class CreateRemainder extends ConsumerStatefulWidget {
   final String videoUrl;
   final String thumbnailUrl;
   final String title;
@@ -26,10 +30,10 @@ class CreateRemainder extends StatefulWidget {
       required this.description});
 
   @override
-  State<CreateRemainder> createState() => _CreateRemainderState();
+  ConsumerState<CreateRemainder> createState() => _CreateRemainderState();
 }
 
-class _CreateRemainderState extends State<CreateRemainder> {
+class _CreateRemainderState extends ConsumerState<CreateRemainder> {
   DateTime selectedDate = DateTime.now();
   DateTime scheduleTime = DateTime.now();
 
@@ -47,6 +51,11 @@ class _CreateRemainderState extends State<CreateRemainder> {
       });
     }
   }
+
+  TwilioFlutter twilioFlutter = TwilioFlutter(
+      accountSid: 'AC418b336caf877e0c18f5101f128bf387',
+      authToken: '3a22440c3fc6bc007462634ce690f31c',
+      twilioNumber: '+14155238886');
 
   TimeOfDay selectedTime = TimeOfDay.now();
 
@@ -77,6 +86,16 @@ class _CreateRemainderState extends State<CreateRemainder> {
   String category = '';
   int selctIndex = 0;
   FirebaseServices firebaseServices = FirebaseServices();
+
+  @override
+  void initState() {
+    twilioFlutter = TwilioFlutter(
+        accountSid: 'AC418b336caf877e0c18f5101f128bf387',
+        authToken: '3a22440c3fc6bc007462634ce690f31c',
+        twilioNumber: '14155238886');
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,8 +148,8 @@ class _CreateRemainderState extends State<CreateRemainder> {
               ),
               CommonTextField(
                 controller: controller,
-                hintText: 'Sunday, morning ride',
-                keyboardType: TextInputType.text,
+                hintText: 'Enter Receiver WhatsApp Number + Country Code',
+                keyboardType: TextInputType.phone,
               ),
               const SizedBox(
                 height: 40,
@@ -291,24 +310,39 @@ class _CreateRemainderState extends State<CreateRemainder> {
               AppButton(
                   text: 'Upload',
                   onPressed: () async {
+                    var uinqId = DateTime.now().second.toString();
                     NotificationService().scheduleNotification(
+                        onSelectNotification: sendMsg,
                         title: widget.title,
                         body: controller.text,
                         scheduledNotificationDateTime: scheduleTime);
-                    await firebaseServices.uploadVideo(
-                        data: VideoModel(
-                      uid: FirebaseAuth.instance.currentUser!.uid,
-                      reminderTitle: controller.text,
-                      videoUrl: widget.videoUrl,
-                      videoThumbnailUrl: widget.thumbnailUrl,
-                      title: widget.title,
-                      description: widget.description,
-                      category: category,
-                      remainderDate:
-                          selectedDate.millisecondsSinceEpoch.toString(),
-                      time: DateTime.now().millisecondsSinceEpoch.toString(),
-                      remainderTime: selectedTime.format(context),
-                    ));
+                    // ref.read(sendMessageProvider);
+                    Workmanager().registerOneOffTask(uinqId, task,
+                        initialDelay: Duration(
+                            seconds: scheduleTime
+                                .difference(DateTime.now())
+                                .inSeconds),
+                        constraints:
+                            Constraints(networkType: NetworkType.connected),
+                        inputData: <String, dynamic>{
+                          'url': widget.videoUrl,
+                          'toNumber': controller.text,
+                        });
+
+                    // await firebaseServices.uploadVideo(
+                    //     data: VideoModel(
+                    //   uid: FirebaseAuth.instance.currentUser!.uid,
+                    //   reminderTitle: controller.text,
+                    //   videoUrl: widget.videoUrl,
+                    //   videoThumbnailUrl: widget.thumbnailUrl,
+                    //   title: widget.title,
+                    //   description: widget.description,
+                    //   category: category,
+                    //   remainderDate:
+                    //       selectedDate.millisecondsSinceEpoch.toString(),
+                    //   time: DateTime.now().millisecondsSinceEpoch.toString(),
+                    //   remainderTime: selectedTime.format(context),
+                    // ));
                   })
             ],
           ),
@@ -316,6 +350,20 @@ class _CreateRemainderState extends State<CreateRemainder> {
       ),
     );
   }
+
+  // void sendMsg() async {
+  //   // const accountSid = 'AC418b336caf877e0c18f5101f128bf387';
+  //   const accountSid = 'AC27af0ae086eb1b7d0d67f8215c98ad93';
+  //   // const authToken = '3a22440c3fc6bc007462634ce690f31c';
+  //   const authToken = 'f403e4f5be32befc928a88474e24465b';
+  //   final twilio = TwilioFlutter(
+  //       accountSid: accountSid,
+  //       authToken: authToken,
+  //       twilioNumber: '+14155238886');
+  //   final message = await twilio.sendWhatsApp(
+  //       messageBody: 'nnjnjbj', toNumber: "+923044410007");
+  //   print(message);
+  // }
 }
 
 class AddCategoryDialog extends StatefulWidget {

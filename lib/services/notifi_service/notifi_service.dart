@@ -19,9 +19,14 @@ class NotificationService {
 
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await notificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse:
-            (NotificationResponse notificationResponse) async {});
+    await notificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse:
+          (NotificationResponse notificationResponse) async {
+        // print(notificationResponse.toString() + "notificationResponse");
+      },
+ 
+    );
   }
 
   final platformNotificationDetails = const NotificationDetails(
@@ -32,24 +37,22 @@ class NotificationService {
       ),
       iOS: DarwinNotificationDetails());
 
-  // notificationDetails() {
-  //   return const NotificationDetails(
-  //       android: AndroidNotificationDetails('channelId', 'channelName',
-  //           importance: Importance.max),
-  //       iOS: DarwinNotificationDetails());
+  // Future showNotification({
+  //   int id = 0,
+  //   String? title,
+  //   String? body,
+  //   String? payLoad,
+  // }) async {
+  //   return notificationsPlugin.show(
+  //       id, title, body, platformNotificationDetails);
   // }
-
-  Future showNotification(
-      {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationsPlugin.show(
-        id, title, body, platformNotificationDetails);
-  }
 
   Future scheduleNotification(
       {int id = 0,
       String? title,
       String? body,
       String? payLoad,
+      required Function() onSelectNotification,
       required DateTime scheduledNotificationDateTime}) async {
     return notificationsPlugin.zonedSchedule(
       id,
@@ -65,6 +68,7 @@ class NotificationService {
       // ignore: deprecated_member_use
       androidAllowWhileIdle: true,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: payLoad,
     );
   }
 }

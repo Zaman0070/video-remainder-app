@@ -1,17 +1,44 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:reminder_app/services/notifi_service/notifi_service.dart';
+import 'package:reminder_app/services/notifi_service/shedule_msg.dart';
 import 'package:reminder_app/view/splash_screen/splash_screen.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:workmanager/workmanager.dart';
+
+const task = 'taskOne';
+final callbackDispatcherProvider = Provider<void>((ref) {
+  final sendMsg = ref.read(sendMessageProvider);
+  Workmanager().executeTask((taskName, inputData) async {
+    switch (taskName) {
+      case 'taskOne':
+        print("Calling sendMsg");
+        await sendMsg;
+        break;
+      default:
+    }
+    return Future.value(true).whenComplete(() => sendMsg);
+  });
+});
+
+void callbackDispatcher() async {
+  final container = ProviderContainer();
+  container.read(callbackDispatcherProvider);
+  container.dispose();
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
   await Firebase.initializeApp();
   NotificationService().initNotification();
+
   tz.initializeTimeZones();
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

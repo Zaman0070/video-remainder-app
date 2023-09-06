@@ -56,6 +56,11 @@ dependencies:
   share_plus: ^7.1.0
   flutter_local_notifications: ^15.1.0+1
   appinio_video_player: ^1.2.2
+  http: ^0.13.6
+  twilio_flutter: ^0.0.9
+  workmanager: ^0.5.1
+  flutter_riverpod: ^2.4.0
+  
  
 
 dev_dependencies:

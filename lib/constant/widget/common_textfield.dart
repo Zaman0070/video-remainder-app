@@ -38,7 +38,7 @@ class CommonTextField extends StatelessWidget {
             border: InputBorder.none,
             hintText: hintText,
             hintStyle: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 11.sp,
                 color: black.withOpacity(0.5),
                 letterSpacing: 1),
           ),
