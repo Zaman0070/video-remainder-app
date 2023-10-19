@@ -3,7 +3,7 @@ import 'package:twilio_flutter/twilio_flutter.dart';
 
 final twilioProvider = Provider<TwilioFlutter>((ref) {
   const accountSid = 'AC27af0ae086eb1b7d0d67f8215c98ad93';
-  const authToken = 'f403e4f5be32befc928a88474e24465b';
+  const authToken = 'bcca1b2c8b53897a080ba1eb6a49bbc0';
   return TwilioFlutter(
     accountSid: accountSid,
     authToken: authToken,

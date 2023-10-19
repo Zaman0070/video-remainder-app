@@ -60,6 +60,7 @@ dependencies:
   twilio_flutter: ^0.0.9
   workmanager: ^0.5.1
   flutter_riverpod: ^2.4.0
+  onesignal_flutter: ^3.3.2
   
  
 

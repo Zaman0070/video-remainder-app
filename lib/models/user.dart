@@ -7,6 +7,7 @@ class UserModel {
   final String? userName;
   final String? userPhone;
   final String? userDescription;
+  final String? token;
   final String? uid;
   UserModel({
     this.userEmail,
@@ -14,6 +15,7 @@ class UserModel {
     this.userName,
     this.userPhone,
     this.userDescription,
+    this.token,
     this.uid,
   });
 
@@ -23,6 +25,7 @@ class UserModel {
     String? userName,
     String? userPhone,
     String? userDescription,
+    String? token,
     String? uid,
   }) {
     return UserModel(
@@ -31,6 +34,7 @@ class UserModel {
       userName: userName ?? this.userName,
       userPhone: userPhone ?? this.userPhone,
       userDescription: userDescription ?? this.userDescription,
+      token: token ?? this.token,
       uid: uid ?? this.uid,
     );
   }
@@ -42,6 +46,7 @@ class UserModel {
       'userName': userName,
       'userPhone': userPhone,
       'userDescription': userDescription,
+      'token': token,
       'uid': uid,
     };
   }
@@ -53,6 +58,7 @@ class UserModel {
       userName: map['userName'] != null ? map['userName'] as String : null,
       userPhone: map['userPhone'] != null ? map['userPhone'] as String : null,
       userDescription: map['userDescription'] != null ? map['userDescription'] as String : null,
+      token: map['token'] != null ? map['token'] as String : null,
       uid: map['uid'] != null ? map['uid'] as String : null,
     );
   }
@@ -63,7 +69,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'User(userEmail: $userEmail, userImage: $userImage, userName: $userName, userPhone: $userPhone, userDescription: $userDescription, uid: $uid)';
+    return 'UserModel(userEmail: $userEmail, userImage: $userImage, userName: $userName, userPhone: $userPhone, userDescription: $userDescription, token: $token, uid: $uid)';
   }
 
   @override
@@ -76,6 +82,7 @@ class UserModel {
       other.userName == userName &&
       other.userPhone == userPhone &&
       other.userDescription == userDescription &&
+      other.token == token &&
       other.uid == uid;
   }
 
@@ -86,6 +93,7 @@ class UserModel {
       userName.hashCode ^
       userPhone.hashCode ^
       userDescription.hashCode ^
+      token.hashCode ^
       uid.hashCode;
   }
 }

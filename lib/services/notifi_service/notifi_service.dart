@@ -25,7 +25,6 @@ class NotificationService {
           (NotificationResponse notificationResponse) async {
         // print(notificationResponse.toString() + "notificationResponse");
       },
- 
     );
   }
 
@@ -53,7 +52,8 @@ class NotificationService {
       String? body,
       String? payLoad,
       required DateTime scheduledNotificationDateTime}) async {
-    return notificationsPlugin.zonedSchedule(
+    return notificationsPlugin
+        .zonedSchedule(
       id,
       title,
       body,
@@ -68,6 +68,9 @@ class NotificationService {
       androidAllowWhileIdle: true,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: payLoad,
-    );
+    )
+        .whenComplete(() {
+      print("scheduleNotification");
+    });
   }
 }

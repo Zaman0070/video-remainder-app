@@ -15,7 +15,8 @@ import 'package:reminder_app/services/firebase_services/firebase_services.dart';
 // ignore: must_be_immutable
 class CreateProfile extends StatefulWidget {
   final String email;
-  CreateProfile({super.key, required this.email});
+  final String token;
+  const CreateProfile({super.key, required this.email,required this.token});
 
   @override
   State<CreateProfile> createState() => _CreateProfileState();
@@ -190,6 +191,7 @@ class _CreateProfileState extends State<CreateProfile> {
                       phoneController.text.trim().isNotEmpty) {
                     image.isNotEmpty
                         ? await firebaseServices.updateProfile(UserModel(
+                          token: widget.token,
                             userEmail: widget.email,
                             userImage: image[0],
                             userName: nameController.text,

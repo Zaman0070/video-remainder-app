@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:reminder_app/constant/app_image.dart';
 import 'package:reminder_app/constant/widget/loading.dart';
 import 'package:reminder_app/models/user.dart';
@@ -24,6 +25,7 @@ class AuthServices {
       },
     );
     try {
+      OSDeviceState? status = await OneSignal.shared.getDeviceState();
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       UserModel userModel = UserModel(
@@ -32,6 +34,7 @@ class AuthServices {
         userName: '',
         userPhone: '',
         userDescription: '',
+        token: status!.userId,
         uid: userCredential.user!.uid,
       );
 
@@ -44,6 +47,7 @@ class AuthServices {
                   Get.snackbar('Success !', 'Account Created Successfully',
                       backgroundColor: white),
                   Get.offAll(() => CreateProfile(
+                        token: status.userId!,
                         email: email,
                       )),
                 });

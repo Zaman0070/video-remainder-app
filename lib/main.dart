@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:reminder_app/services/notifi_service/notifi_service.dart';
 import 'package:reminder_app/services/notifi_service/shedule_msg.dart';
 import 'package:reminder_app/view/splash_screen/splash_screen.dart';
@@ -14,10 +15,13 @@ const task = 'taskOne';
 final callbackDispatcherProvider = Provider<void>((ref) {
   final sendMsg = ref.read(sendMessageProvider);
   Workmanager().executeTask((taskName, inputData) async {
+    if (taskName == 'taskOne') {
+      sendMsg;
+    }
     switch (taskName) {
       case 'taskOne':
         print("Calling sendMsg");
-        await sendMsg;
+        sendMsg;
         break;
       default:
     }
@@ -35,6 +39,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
   await Firebase.initializeApp();
+  OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+  OneSignal.shared.setAppId('b80a7b21-dfb0-49d5-bc1c-d8e20d7da33c');
+  OneSignal.shared.setNotificationWillShowInForegroundHandler(
+      (OSNotificationReceivedEvent event) {
+    event.complete(event.notification);
+  });
+  OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
+    debugPrint('Accepted permission: $accepted');
+  });
   NotificationService().initNotification();
 
   tz.initializeTimeZones();

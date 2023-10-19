@@ -8,13 +8,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:reminder_app/constant/app_image.dart';
 import 'package:reminder_app/constant/widget/app_button.dart';
+import 'package:reminder_app/constant/widget/catch_image.dart';
 import 'package:reminder_app/constant/widget/common_textfield.dart';
-import 'package:reminder_app/main.dart';
+import 'package:reminder_app/constant/widget/loadingWidget.dart';
+import 'package:reminder_app/models/user.dart';
 import 'package:reminder_app/services/firebase_services/firebase_services.dart';
-import 'package:reminder_app/services/notifi_service/notifi_service.dart';
+import 'package:reminder_app/services/one_signal/one_signal.dart';
 import 'package:reminder_app/view/upload_video/widgets/reminder_card.dart';
 import 'package:twilio_flutter/twilio_flutter.dart';
-import 'package:workmanager/workmanager.dart';
 
 class CreateRemainder extends ConsumerStatefulWidget {
   final String videoUrl;
@@ -309,23 +310,32 @@ class _CreateRemainderState extends ConsumerState<CreateRemainder> {
               AppButton(
                   text: 'Upload',
                   onPressed: () async {
-                    var uinqId = DateTime.now().second.toString();
-                    NotificationService().scheduleNotification(
-                        title: widget.title,
-                        body: controller.text,
-                        scheduledNotificationDateTime: scheduleTime);
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return UserListDialog(
+                          title: widget.title,
+                        );
+                      },
+                    );
+
+                    //     .whenComplete(() {
+                    //   Future.delayed(const Duration(seconds: 15), () async {
+                    //     ref.read(sendMessageProvider);
+                    //   });
+                    // });
                     // ref.read(sendMessageProvider);
-                    Workmanager().registerOneOffTask(uinqId, task,
-                        initialDelay: Duration(
-                            seconds: scheduleTime
-                                .difference(DateTime.now())
-                                .inSeconds),
-                        constraints:
-                            Constraints(networkType: NetworkType.connected),
-                        inputData: <String, dynamic>{
-                          'url': widget.videoUrl,
-                          'toNumber': controller.text,
-                        });
+                    // Workmanager().registerOneOffTask(uinqId, task,
+                    //     initialDelay: Duration(
+                    //         seconds: scheduleTime
+                    //             .difference(DateTime.now())
+                    //             .inSeconds),
+                    //     constraints:
+                    //         Constraints(networkType: NetworkType.connected),
+                    //     inputData: <String, dynamic>{
+                    //       'url': widget.videoUrl,
+                    //       'toNumber': controller.text,
+                    //     });
 
                     // await firebaseServices.uploadVideo(
                     //     data: VideoModel(
@@ -349,19 +359,19 @@ class _CreateRemainderState extends ConsumerState<CreateRemainder> {
     );
   }
 
-  // void sendMsg() async {
-  //   // const accountSid = 'AC418b336caf877e0c18f5101f128bf387';
-  //   const accountSid = 'AC27af0ae086eb1b7d0d67f8215c98ad93';
-  //   // const authToken = '3a22440c3fc6bc007462634ce690f31c';
-  //   const authToken = 'f403e4f5be32befc928a88474e24465b';
-  //   final twilio = TwilioFlutter(
-  //       accountSid: accountSid,
-  //       authToken: authToken,
-  //       twilioNumber: '+14155238886');
-  //   final message = await twilio.sendWhatsApp(
-  //       messageBody: 'nnjnjbj', toNumber: "+923044410007");
-  //   print(message);
-  // }
+  void sendMsg() async {
+    // const accountSid = 'AC418b336caf877e0c18f5101f128bf387';
+    const accountSid = 'AC26073bd81df50a7bb92e5bc071d3fb74';
+    // const authToken = '3a22440c3fc6bc007462634ce690f31c';
+    const authToken = '788f2c7b56be4dda063bf7da80ef0809';
+    final twilio = TwilioFlutter(
+        accountSid: accountSid,
+        authToken: authToken,
+        twilioNumber: '+14155238886');
+    final message = await twilio.sendWhatsApp(
+        messageBody: 'nnjnjbj', toNumber: "+923044410007");
+    print(message);
+  }
 }
 
 class AddCategoryDialog extends StatefulWidget {
@@ -411,6 +421,141 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
             // Close the dialog
           },
           child: const Text('Add Category'),
+        ),
+      ],
+    );
+  }
+}
+
+class UserListDialog extends StatefulWidget {
+  final String title;
+  const UserListDialog({super.key, required this.title});
+
+  @override
+  _UserListDialogState createState() => _UserListDialogState();
+}
+
+class _UserListDialogState extends State<UserListDialog> {
+  FirebaseServices firebaseServices = FirebaseServices();
+
+  List<int> selectedItems = [];
+  OneSignals oneSignal = OneSignals();
+  List tokenIdList = [];
+  String name = '';
+
+  getCurrentUserData() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((value) {
+      UserModel userModel = UserModel.fromMap(value.data()!);
+      name = userModel.userName as String;
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    getCurrentUserData();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text(
+        'User Lists',
+        style: TextStyle(color: Colors.black),
+      ),
+      content: SizedBox(
+        height: 350.h,
+        child: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .where('uid',
+                    isNotEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const LoadingWidget(color: appColor);
+              }
+
+              return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                itemBuilder: (BuildContext context, int index) {
+                  UserModel userModel =
+                      UserModel.fromMap(snapshot.data!.docs[index].data());
+                  return ListTile(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    leading: CachedRectangularNetworkImageWidget(
+                      radius: 30,
+                      image: userModel.userImage as String,
+                      width: 35.h,
+                      height: 30.h,
+                    ),
+                    title: Text(
+                      userModel.userName as String,
+                      style: TextStyle(
+                          color: black,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    trailing: InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (selectedItems.contains(index)) {
+                            selectedItems.remove(index);
+                          } else {
+                            selectedItems.add(index);
+                          }
+                        });
+                        print(widget.title);
+                        tokenIdList.add(userModel.token!);
+                        print(tokenIdList.first);
+                      },
+                      child: Container(
+                        height: 16.h,
+                        width: 16.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5.r),
+                          border: Border.all(color: appColor, width: 1.5),
+                        ),
+                        child: Icon(
+                          Icons.check,
+                          color: selectedItems.contains(index)
+                              ? appColor
+                              : Colors.transparent,
+                          size: 12.h,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+      ),
+      actions: [
+        ElevatedButton(
+          style:
+              ButtonStyle(backgroundColor: MaterialStateProperty.all(appColor)),
+          onPressed: () async {
+            await oneSignal
+                .sendNotification(
+              tokenIdList,
+              name,
+              widget.title,
+              AppImage.logo,
+            )
+                .whenComplete(() {
+              Navigator.pop(context);
+            });
+          },
+          child: const Text('Send'),
         ),
       ],
     );
